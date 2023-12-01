@@ -1,0 +1,25 @@
+import itertools
+import string
+import hashlib
+k = input("what do you want you password to be? ")
+def guess_password(real):
+    chars = string.ascii_lowercase + string.digits
+    attempts = 0
+    for password_length in range(1, 9):
+        for guess in itertools.product(chars, repeat=password_length):
+            attempts += 1
+            guess = ''.join(guess)
+            if guess == real:
+                return 'password is {}. found in {} guesses.'.format(guess, attempts)
+            # uncomment to display attempts, though will be slower
+            # print(guess, attempts)
+def encrypt_string(hash_string):
+    sha_signature = \
+        hashlib.sha256(hash_string.encode()).hexigest()
+    return sha_signature
+
+print(guess_password(k))
+
+
+
+
