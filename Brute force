@@ -1,24 +1,131 @@
+# to Run it enter this before in the tirminal:  cd C:\Users\100031797\Downloads
+# to run type this: python BruteForce.py run
+
 import itertools
 import string
 import hashlib
+from string import printable
+from time import time
+from array import array
+import sys
+import len
+import digest
+
+arg1 = sys.argv[1]
+arg2 = sys.argv[1]
+arg3 = sys.argv[1]
+
 k = input("what do you want you password to be? ")
+
+
+#guess password with brute force
 def guess_password(real):
     chars = string.ascii_lowercase + string.digits
     attempts = 0
-    for password_length in range(1, 9):
+    for password_length in range(1, k.len()):
         for guess in itertools.product(chars, repeat=password_length):
             attempts += 1
             guess = ''.join(guess)
             if guess == real:
-                return 'password is {}. found in {} guesses.'.format(guess, attempts)
+                return 'Password is {}. Found in {} guesses.'.format(guess, attempts)
             # uncomment to display attempts, though will be slower
             # print(guess, attempts)
-def encrypt_string(hash_string):
+
+def sha_string(hash_string):
     sha_signature = \
         hashlib.sha256(hash_string.encode()).hexigest()
     return sha_signature
 
-print(guess_password(k))
+def md5_string(hash_string):
+    md5_signature = \
+        hashlib.md5(hash_string.encode()).hexdigest()
+    return md5_signature
+    k = md5_signature
+    print(PasswordCracker(k))
+
+  
+
+ENCODING = "ascii" # utf-8 for unicode support
+
+class CharSet():
+  def __init__(self, chars):
+    chars = to_bytes(chars)
+    self.chars = set(chars)
+    self.first = chars[0]
+    self.last = chars[-1]
+    self.next = array("B", [0] * 256)
+    for char, next_char in zip(chars, chars[1:]):
+      self.next[char] = next_char
+
+  def update_chars(self, new_chars):
+    new_chars = to_bytes(new_chars)
+    new_chars = set(new_chars) - self.chars
+    if new_chars: # if theres anything new
+      self.chars |= new_chars
+      new_chars = list(new_chars)
+      self.next[self.last] = new_chars[0]
+      self.last = new_chars[-1]
+      for char, next_char in zip(new_chars, new_chars[1:]):
+        self.next[char] = next_char
+
+  def get_advance(self, arr, hash_):
+    first = self.first
+    last = self.last
+    next_ = self.next
+    def advance():
+      for ind, byte in enumerate(arr):
+        if byte == last:
+          arr[ind] = first
+        else:
+          arr[ind] = next_[byte]
+          return hash_(arr)
+
+      arr.append(first)
+      return hash_(arr)
+
+    return advance
+
+class PasswordCracker():
+  def __init__(self, hash_, chars=None):
+    self.hash = hash_
+    if chars is None:
+      chars = printable
+    self.char_set = CharSet(chars)
+
+  def update_chars(self, string):
+    self.char_set.update_chars(string)
+
+  def crack(self, hashed):
+    arr = bytearray()
+    advance = self.char_set.get_advance(arr, self.hash)
+    for _ in iter(advance, hashed):
+      pass
+    return arr
+
+def to_bytes(string):
+  if isinstance(string, str):
+    return bytearray(string, ENCODING)
+  elif isinstance(string, (bytes, bytearray)):
+    return string
+  else:
+    raise TypeError(f"Cannot convert {string} to bytes")
+
+def get_hasher(hash_):
+  def hasher(bytes):
+    return hash_(bytes).digest()
+
+  return hasher
+
+# print(guess_password(k))
+
+if arg1 == "run":
+  print(guess_password(k))
+
+if arg2 == "why":
+  print(md5_string(k))
+
+if arg3 == "No":
+  print(PasswordCracker(k))
 
 
 
